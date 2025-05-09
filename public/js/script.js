@@ -2,10 +2,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("formRegistro");
 
     async function validarMatricula(matricula) {
-        const response = await fetch("/legajos.csv");
-        const texto = await response.text();
-        const lineas = texto.split('\n').map(l => l.trim());
-        return lineas.includes(matricula);
+        try {
+            const response = await fetch("/legajos.csv");
+            const texto = await response.text();
+            const lineas = texto.split('\n').map(l => l.trim());
+            return lineas.includes(matricula);
+        } catch (err) {
+            console.error("Error leyendo legajos.csv:", err);
+            return false;
+        }
     }
 
     form.addEventListener("submit", async function (event) {
@@ -14,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const matricula = document.getElementById("matricula").value.trim();
         const celular = document.getElementById("celular").value.trim();
 
-        // Validaciones básicas
+        // Validaciones
         if (!/^[0-9]+$/.test(matricula)) {
             alert("La matrícula debe contener solo números.");
             return;
@@ -33,7 +38,10 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         const fechaFormateada = new Date().toLocaleDateString('es-ES', {
-            weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+            weekday: 'long',
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric'
         }).replace(/^\w/, c => c.toUpperCase());
 
         // Enviar al backend
@@ -47,6 +55,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 alert("Registro exitoso.");
                 form.reset();
             })
-            .catch(err => alert("Error al contactar con el servidor."));
+            .catch(err => {
+                console.error("Error al contactar con el servidor:", err);
+                alert("Error al contactar con el servidor.");
+            });
     });
 });
